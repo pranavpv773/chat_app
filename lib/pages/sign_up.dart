@@ -60,7 +60,7 @@ class SignUpScreen extends StatelessWidget {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 150,
+                          horizontal: 120,
                           vertical: 15,
                         ),
                         backgroundColor: Colors.amber,

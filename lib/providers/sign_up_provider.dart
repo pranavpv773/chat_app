@@ -32,8 +32,8 @@ class SignUpProvider with ChangeNotifier {
           await auth
               .createUserWithEmailAndPassword(email: email, password: password)
               .then((value) => {podtDetailsToFirebase(context)});
-        } on FirebaseAuthException {
-          Fluttertoast.showToast(msg: "Something went wrong!");
+        } on FirebaseAuthException catch (e) {
+          Fluttertoast.showToast(msg: e.message.toString());
         }
       }
     }
