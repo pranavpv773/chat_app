@@ -85,9 +85,9 @@ class ChatPageState extends State<ChatPage> {
     // }
     String peerId = widget.arguments.peerId;
     if (AppPref.userToken.compareTo(peerId) > 0) {
-      groupChatId = AppPref.recieverUsid;
+      groupChatId = '${AppPref.useruid}-$peerId';
     } else {
-      groupChatId = AppPref.recieverUsid;
+      groupChatId = '$peerId-${AppPref.recieverUsid}';
     }
 
     chatProvider.updateDataFirestore(

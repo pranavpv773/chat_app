@@ -113,28 +113,33 @@ class SignUpProvider with ChangeNotifier {
   void googleLogIn(BuildContext context) async {
     try {
       notifyListeners();
-
-      final result = await GoogleSignIn().signIn();
-      if (result == null) {
-        notifyListeners();
-        Fluttertoast.showToast(
-          msg: "somme error",
-          toastLength: Toast.LENGTH_LONG,
+      final GoogleSignIn _googleSignIn = GoogleSignIn();
+      try {
+        final GoogleSignInAccount? googleSignInAccount =
+            await _googleSignIn.signIn();
+        final GoogleSignInAuthentication googleSignInAuthentication =
+            await googleSignInAccount!.authentication;
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleSignInAuthentication.accessToken,
+          idToken: googleSignInAuthentication.idToken,
         );
+        await auth.signInWithCredential(credential);
+      } on FirebaseAuthException catch (e) {
+        print(e.message);
+        throw e;
       }
-      final cred = await result!.authentication;
-
-      await auth
-          .signInWithCredential(GoogleAuthProvider.credential(
-              accessToken: cred.accessToken, idToken: cred.idToken))
-          .then((value) {
-        return Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(),
-          ),
-        );
-      });
+      // await auth
+      //     .signInWithCredential(GoogleAuthProvider.credential(
+      //         accessToken: cred.accessToken, idToken: cred.idToken))
+      //     .then((value) {
+      //result.displayName;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(),
+        ),
+      );
+      //  });
 
       notifyListeners();
       Fluttertoast.showToast(

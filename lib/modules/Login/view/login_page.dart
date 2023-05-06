@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
-import 'package:flutter_chat_demo/modules/sign_up/model_view/sign_up_provider.dart';
 import 'package:flutter_chat_demo/modules/sign_up/view/sign_up.dart';
 import 'package:flutter_chat_demo/providers/auth_provider.dart';
 import 'package:flutter_chat_demo/modules/Login/model_view/login_provider.dart';
@@ -54,11 +53,13 @@ class LoginPageState extends State<LoginPage> {
                         const EdgeInsets.only(top: 20, right: 40, left: 40),
                     child: TextFormField(
                       validator: (input) {
-                        return input!.isEmpty
-                            ? "email is empty"
-                            : context.read<LoginProvider>().isValidEmail(input)
-                                ? null
-                                : "Check your email";
+                        return null;
+
+                        // return input!.isEmpty
+                        //     ? "email is empty"
+                        //     : context.read<LoginProvider>().isValidEmail(input)
+                        //         ? null
+                        //         : "Check your email";
                       },
                       keyboardType: TextInputType.emailAddress,
                       controller: context.read<LoginProvider>().email,
@@ -211,7 +212,7 @@ class LoginPageState extends State<LoginPage> {
                 Center(
                   child: TextButton(
                     onPressed: () async {
-                      context.read<SignUpProvider>().googleLogIn(context);
+                      context.read<AuthProvider>().handleSignIn();
                     },
                     child: Text(
                       'Sign in with Google',

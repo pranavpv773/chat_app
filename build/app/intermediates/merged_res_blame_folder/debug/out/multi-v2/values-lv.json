@@ -21,6 +21,23 @@
                     }
                 },
                 {
+                    "source": "/home/pranav/.gradle/caches/transforms-3/4e8e8d5e83f29f5a5213267314b41e8f/transformed/jetified-play-services-basement-18.2.0/res/values-lv/values.xml",
+                    "from": {
+                        "startLines": "4",
+                        "startColumns": "0",
+                        "startOffsets": "195",
+                        "endColumns": "161",
+                        "endOffsets": "356"
+                    },
+                    "to": {
+                        "startLines": "10",
+                        "startColumns": "4",
+                        "startOffsets": "1060",
+                        "endColumns": "165",
+                        "endOffsets": "1221"
+                    }
+                },
+                {
                     "source": "/home/pranav/.gradle/caches/transforms-3/17291996fc57c5eb529cc0b13624d4b6/transformed/core-1.9.0/res/values-lv/values-lv.xml",
                     "from": {
                         "startLines": "2",
@@ -35,23 +52,6 @@
                         "startOffsets": "2779",
                         "endColumns": "100",
                         "endOffsets": "2875"
-                    }
-                },
-                {
-                    "source": "/home/pranav/.gradle/caches/transforms-3/b39da8a27d302c7d862a4d4b3f2f6dab/transformed/jetified-play-services-basement-18.1.0/res/values-lv/values.xml",
-                    "from": {
-                        "startLines": "4",
-                        "startColumns": "0",
-                        "startOffsets": "195",
-                        "endColumns": "161",
-                        "endOffsets": "356"
-                    },
-                    "to": {
-                        "startLines": "10",
-                        "startColumns": "4",
-                        "startOffsets": "1060",
-                        "endColumns": "165",
-                        "endOffsets": "1221"
                     }
                 },
                 {
