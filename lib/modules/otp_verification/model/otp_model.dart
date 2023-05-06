@@ -1,20 +1,26 @@
+// To parse this JSON data, do
+//
+//     final otpModel = otpModelFromJson(jsonString);
+
+import 'dart:convert';
+
+OtpModel otpModelFromJson(String str) => OtpModel.fromJson(json.decode(str));
+
+String otpModelToJson(OtpModel data) => json.encode(data.toJson());
+
 class OtpModel {
+  String otp;
+
   OtpModel({
-    required this.id,
-    required this.userOtp,
+    required this.otp,
   });
 
-  String userOtp;
-  String id;
-
   factory OtpModel.fromJson(Map<String, dynamic> json) => OtpModel(
-        userOtp: json["user_otp"],
-        id: json["_id"],
+        otp: json["otp"],
       );
 
   Map<String, dynamic> toJson() => {
-        "user_otp": userOtp,
-        "_id": id,
+        "otp": otp,
       };
 }
 

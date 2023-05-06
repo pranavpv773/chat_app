@@ -1,11 +1,15 @@
 // ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/models/user_modal.dart';
+import 'package:flutter_chat_demo/modules/otp_verification/api_services/api_services.dart';
+import 'package:flutter_chat_demo/modules/otp_verification/view/otp_screen.dart';
 import 'package:flutter_chat_demo/modules/pages.dart';
-import 'package:flutter_chat_demo/services/apppref.dart';
+import 'package:flutter_chat_demo/modules/sign_up/model/sign_up_model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SignUpProvider with ChangeNotifier {
   final signUpKey = GlobalKey<FormState>();
@@ -25,25 +29,27 @@ class SignUpProvider with ChangeNotifier {
       if (password.text != confirmPassword.text) {
         Fluttertoast.showToast(msg: "password not matching!");
       } else {
-        // final data = EmailOtp(
-        //   email: email.text,
-        // );
+        final data = SignUpModel(
+          userMail: email.text,
+          userPassword: password.text,
+          userName: userName.text,
+          phoneNumber: int.parse(phoneNumber.text),
+        );
 
-        // SignUpResponse? resp = await OtpApiService().signUp(data);
-        // if (resp!.status) {
-        //   context.read<OtpVerifyProvider>().otpToken = resp.id!;
-        // }
-        // Fluttertoast.showToast(
-        //   msg: resp.message,
-        //   toastLength: Toast.LENGTH_LONG,
-        // );
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => OtpVerificationScreen(),
-        //   ),
-        // );
-        podtDetailsToFirebase(context);
+        SignUpResponse? resp = await OtpApiService().signUp(data);
+        if (resp!.success == "otp send successfully") {
+          Fluttertoast.showToast(
+            msg: "otp send successfully",
+            toastLength: Toast.LENGTH_LONG,
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OtpVerificationScreen(),
+            ),
+          );
+          // );  context.read<OtpVerifyProvider>().otpToken = resp.id!;
+        }
       }
     }
   }
@@ -67,20 +73,11 @@ class SignUpProvider with ChangeNotifier {
           loggedUserModelH.toMap(),
         );
     disposeControll();
-    await auth
-        .signInWithEmailAndPassword(email: email.text, password: password.text)
-        .then(
-      (value) async {
-        AppPref.userToken =
-            await FirebaseAuth.instance.currentUser!.getIdToken();
-        AppPref.useruid = FirebaseAuth.instance.currentUser!.uid;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(),
-          ),
-        );
-      },
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(),
+      ),
     );
     // context.read<SnackTProvider>().successSnack(context);
   }
@@ -111,5 +108,45 @@ class SignUpProvider with ChangeNotifier {
     email.clear();
     confirmPassword.clear();
     password.clear();
+  }
+
+  void googleLogIn(BuildContext context) async {
+    try {
+      notifyListeners();
+
+      final result = await GoogleSignIn().signIn();
+      if (result == null) {
+        notifyListeners();
+        Fluttertoast.showToast(
+          msg: "somme error",
+          toastLength: Toast.LENGTH_LONG,
+        );
+      }
+      final cred = await result!.authentication;
+
+      await auth
+          .signInWithCredential(GoogleAuthProvider.credential(
+              accessToken: cred.accessToken, idToken: cred.idToken))
+          .then((value) {
+        return Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(),
+          ),
+        );
+      });
+
+      notifyListeners();
+      Fluttertoast.showToast(
+        msg: "Succesfully Logged in",
+        toastLength: Toast.LENGTH_LONG,
+      );
+    } on FirebaseAuthException catch (exe) {
+      Fluttertoast.showToast(
+        msg: exe.message.toString(),
+        toastLength: Toast.LENGTH_LONG,
+      );
+      notifyListeners();
+    }
   }
 }

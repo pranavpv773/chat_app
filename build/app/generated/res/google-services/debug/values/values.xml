@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="default_web_client_id" translatable="false">87902663395-6qi5fc2pn6sfilq7cki6pluanel43asi.apps.googleusercontent.com</string>
+    <string name="default_web_client_id" translatable="false">87902663395-oefn9dlgs01riq3qr1qo77eg596a0im8.apps.googleusercontent.com</string>
     <string name="gcm_defaultSenderId" translatable="false">87902663395</string>
     <string name="google_api_key" translatable="false">AIzaSyA64D-FGmEGCK6Ot7CwIphJZQBCF__qBoU</string>
     <string name="google_app_id" translatable="false">1:87902663395:android:bbd1c325a9d81dae66cbd6</string>

@@ -34,26 +34,18 @@ class SignUpModel {
 }
 
 class SignUpResponse {
+  String success;
+
   SignUpResponse({
-    required this.status,
-    required this.message,
-    this.id,
+    required this.success,
   });
 
-  bool status;
-  String message;
-  String? id;
-
   factory SignUpResponse.fromJson(Map<String, dynamic> json) => SignUpResponse(
-        status: json["status"] ?? "",
-        message: json["message"] ?? "",
-        id: json["id"] ?? "",
+        success: json["success"],
       );
 
   Map<String, dynamic> toJson() => {
-        "status": status,
-        "message": message,
-        "id": id,
+        "success": success,
       };
 }
 

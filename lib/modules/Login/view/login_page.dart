@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
+import 'package:flutter_chat_demo/modules/sign_up/model_view/sign_up_provider.dart';
 import 'package:flutter_chat_demo/modules/sign_up/view/sign_up.dart';
 import 'package:flutter_chat_demo/providers/auth_provider.dart';
 import 'package:flutter_chat_demo/modules/Login/model_view/login_provider.dart';
@@ -8,7 +9,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 import '../../../widgets/widgets.dart';
-import '../../pages.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -211,19 +211,7 @@ class LoginPageState extends State<LoginPage> {
                 Center(
                   child: TextButton(
                     onPressed: () async {
-                      authProvider.handleSignIn().then((isSuccess) {
-                        if (isSuccess) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomePage(),
-                            ),
-                          );
-                        }
-                      }).catchError((error, stackTrace) {
-                        Fluttertoast.showToast(msg: error.toString());
-                        authProvider.handleException();
-                      });
+                      context.read<SignUpProvider>().googleLogIn(context);
                     },
                     child: Text(
                       'Sign in with Google',

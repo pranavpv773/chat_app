@@ -9,33 +9,33 @@ class OtpApiService {
     // log(data.userOtp.toString());
     try {
       Response response = await Dio().post(
-          'https://menzclub.onrender.com/account/otp',
+          'https://chat-app-server-qvr3.onrender.com/api/verify-otp/',
           data: data.toJson());
       if (response.statusCode! >= 200 && response.statusCode! <= 299) {
         // log(response.data.toString());
-        return OtpVerifyResponse.fromJson(response.data);
+        return SignUpResponse.fromJson(response.data);
       } else {
         log('2executed');
-        return OtpVerifyResponse.fromJson(response.data);
+        return SignUpResponse.fromJson(response.data);
       }
     } on DioError catch (e) {
       // log('message');
-      return OtpVerifyResponse.fromJson(e.response!.data);
+      return SignUpResponse.fromJson(e.response!.data);
     } catch (e) {
       log(e.toString());
-      return OtpVerifyResponse(status: false, message: e.toString());
+      return SignUpResponse(success: e.toString());
     }
   }
 
-  Future<SignUpResponse?> signUp(EmailOtp data) async {
+  Future<SignUpResponse?> signUp(SignUpModel data) async {
     log('reached on sign up');
     try {
       Response response = await Dio().post(
-          'https://chat-app-server-qvr3.onrender.com/api/send-mail/',
-          data: {"email": "krishnajithus673@gmail.com"});
+          'https://chat-app-server-qvr3.onrender.com/api/send-email/',
+          data: {
+            "email": "pranavpv773@gmail.com",
+          });
       if (response.statusCode! >= 200 && response.statusCode! <= 299) {
-        log('signup ${response.data.toString()}');
-
         return SignUpResponse.fromJson(response.data);
       } else {
         return SignUpResponse.fromJson(response.data);
@@ -45,7 +45,7 @@ class OtpApiService {
       return SignUpResponse.fromJson(e.response!.data);
     } catch (e) {
       log(e.toString());
-      return SignUpResponse(status: false, message: e.toString());
+      return SignUpResponse(success: e.toString());
     }
   }
 }
