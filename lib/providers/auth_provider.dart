@@ -92,7 +92,7 @@ class AuthProvider extends ChangeNotifier {
           DocumentSnapshot documentSnapshot = documents[0];
           UserChat userChat = UserChat.fromDocument(documentSnapshot);
           // Write data to local
-          await prefs.setString(FirestoreConstants.id, userChat.id);
+          await prefs.setString(FirestoreConstants.id, userChat.id.toString());
           await prefs.setString(FirestoreConstants.nickname, userChat.nickname);
           await prefs.setString(FirestoreConstants.photoUrl, userChat.photoUrl);
           await prefs.setString(FirestoreConstants.aboutMe, userChat.aboutMe);

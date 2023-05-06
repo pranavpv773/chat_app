@@ -3,13 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/models/user_modal.dart';
-import 'package:flutter_chat_demo/modules/otp_verification/api_services/api_services.dart';
-import 'package:flutter_chat_demo/modules/otp_verification/view/otp_screen.dart';
-import 'package:flutter_chat_demo/modules/otp_verification/view_model/otp_provider.dart';
+import 'package:flutter_chat_demo/modules/pages.dart';
+import 'package:flutter_chat_demo/services/apppref.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:provider/provider.dart';
-
-import '../model/sign_up_model.dart';
 
 class SignUpProvider with ChangeNotifier {
   final signUpKey = GlobalKey<FormState>();
@@ -29,27 +25,25 @@ class SignUpProvider with ChangeNotifier {
       if (password.text != confirmPassword.text) {
         Fluttertoast.showToast(msg: "password not matching!");
       } else {
-        final data = SignUpModel(
-          userMail: email.text,
-          userPassword: password.text,
-          userName: userName.text,
-          phoneNumber: int.parse(phoneNumber.text),
-        );
+        // final data = EmailOtp(
+        //   email: email.text,
+        // );
 
-        SignUpResponse? resp = await OtpApiService().signUp(data);
-        if (resp!.status) {
-          context.read<OtpVerifyProvider>().otpToken = resp.id!;
-        }
-        Fluttertoast.showToast(
-          msg: resp.message,
-          toastLength: Toast.LENGTH_LONG,
-        );
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OtpVerificationScreen(),
-          ),
-        );
+        // SignUpResponse? resp = await OtpApiService().signUp(data);
+        // if (resp!.status) {
+        //   context.read<OtpVerifyProvider>().otpToken = resp.id!;
+        // }
+        // Fluttertoast.showToast(
+        //   msg: resp.message,
+        //   toastLength: Toast.LENGTH_LONG,
+        // );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => OtpVerificationScreen(),
+        //   ),
+        // );
+        podtDetailsToFirebase(context);
       }
     }
   }
@@ -65,12 +59,29 @@ class SignUpProvider with ChangeNotifier {
     loggedUserModelH.uid = user.uid;
     loggedUserModelH.username = userName.text;
     loggedUserModelH.phone = phoneNumber.text;
+    loggedUserModelH.aboutMe = "";
+    loggedUserModelH.photoUrl = "";
 
     //sending details to fireStore
     await firebaseFirestore.collection('users').doc(user.uid).set(
           loggedUserModelH.toMap(),
         );
     disposeControll();
+    await auth
+        .signInWithEmailAndPassword(email: email.text, password: password.text)
+        .then(
+      (value) async {
+        AppPref.userToken =
+            await FirebaseAuth.instance.currentUser!.getIdToken();
+        AppPref.useruid = FirebaseAuth.instance.currentUser!.uid;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(),
+          ),
+        );
+      },
+    );
     // context.read<SnackTProvider>().successSnack(context);
   }
 

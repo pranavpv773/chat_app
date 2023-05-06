@@ -6,7 +6,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/models/popup_choices.dart';
-import 'package:flutter_chat_demo/modules/settings_page.dart';
+import 'package:flutter_chat_demo/modules/Login/model_view/login_provider.dart';
+import 'package:flutter_chat_demo/modules/Login/view/login_page.dart';
+import 'package:flutter_chat_demo/modules/settings/view/settings_page.dart';
 import 'package:flutter_chat_demo/providers/auth_provider.dart';
 import 'package:flutter_chat_demo/services/apppref.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -96,17 +98,17 @@ class HomePageState extends State<HomePage> {
     });
   }
 
-  // void configLocalNotification() {
-  //   AndroidInitializationSettings initializationSettingsAndroid =
-  //       AndroidInitializationSettings('app_icon');
-  //   DarwinInitializationSettings initializationSettingsIOS =
-  //       DarwinInitializationSettings();
-  //   InitializationSettings initializationSettings = InitializationSettings(
-  //     android: initializationSettingsAndroid,
-  //     iOS: initializationSettingsIOS,
-  //   );
-  //   flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  // }
+  void configLocalNotification() {
+    AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('app_icon');
+    DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings();
+    InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
 
   // void scrollListener() {
   //   if (listScrollController.offset >=
@@ -120,7 +122,12 @@ class HomePageState extends State<HomePage> {
 
   void onItemMenuPress(PopupChoices choice) {
     if (choice.title == 'Log out') {
-      AppPref.userToken = "";
+      // AppPref.userToken = "";
+      context.read<LoginProvider>().logOut(context);
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+          (route) => false);
     } else {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => SettingsPage()));
@@ -131,7 +138,7 @@ class HomePageState extends State<HomePage> {
     AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       Platform.isAndroid ? 'android.packege' : 'ios.package',
-      'Flutter chat demo',
+      'chat App',
       playSound: true,
       enableVibration: true,
       importance: Importance.max,
@@ -292,11 +299,8 @@ class HomePageState extends State<HomePage> {
                             itemBuilder: (context, index) {
                               print(
                                   "${snapshot.data?.docs[index]['uid']}--- ${AppPref.useruid}");
-                              return snapshot.data?.docs[index]['uid'] ==
-                                      AppPref.useruid
-                                  ? SizedBox.shrink()
-                                  : buildItem(
-                                      context, snapshot.data?.docs[index]);
+                              return buildItem(
+                                  context, snapshot.data?.docs[index]);
                             },
                             itemCount: snapshot.data?.docs.length,
                           );
@@ -422,6 +426,8 @@ class HomePageState extends State<HomePage> {
       child: TextButton(
         child: Row(
           children: <Widget>[
+            // document!['photoUrl'] == null || document['photoUrl'] == ""
+            //     ?
             Material(
               child: Icon(
                 Icons.account_circle,
@@ -431,6 +437,7 @@ class HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.all(Radius.circular(25)),
               clipBehavior: Clip.hardEdge,
             ),
+            //   : CircleAvatar(child: Image.file(document['photoUrl'])),
             Flexible(
               child: Container(
                 child: Column(
