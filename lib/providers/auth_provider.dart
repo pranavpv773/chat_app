@@ -73,8 +73,8 @@ class AuthProvider extends ChangeNotifier {
               .collection(FirestoreConstants.pathUserCollection)
               .doc(firebaseUser.uid)
               .set({
-            FirestoreConstants.nickname: firebaseUser.displayName,
-            FirestoreConstants.photoUrl: firebaseUser.photoURL,
+            FirestoreConstants.nickname: firebaseUser.displayName ?? "display",
+            FirestoreConstants.photoUrl: firebaseUser.photoURL ?? "",
             FirestoreConstants.id: firebaseUser.uid,
             'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
             FirestoreConstants.chattingWith: null

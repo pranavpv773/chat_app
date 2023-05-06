@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_demo/services/apppref.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../home/view/home_page.dart';
@@ -22,15 +23,20 @@ class LoginProvider with ChangeNotifier {
             .signInWithEmailAndPassword(
                 email: email.text, password: password.text)
             .then(
-              (value) => {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => HomePage(),
-                  ),
-                )
-              },
-            );
+          (value) async {
+            return {
+              AppPref.userToken =
+                  await FirebaseAuth.instance.currentUser!.getIdToken(),
+              AppPref.useruid = FirebaseAuth.instance.currentUser!.uid,
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(),
+                ),
+              )
+            };
+          },
+        );
         notifyListeners();
         email.clear();
         password.clear();

@@ -13,10 +13,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'constants/color_constants.dart';
 import 'modules/pages.dart';
 import 'providers/providers.dart';
+import 'services/apppref.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await AppPref.init();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   runApp(MyApp(prefs: prefs));
 }

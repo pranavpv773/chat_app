@@ -6,14 +6,15 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/models/models.dart';
+import 'package:flutter_chat_demo/modules/full_photo_page.dart';
 import 'package:flutter_chat_demo/providers/providers.dart';
+import 'package:flutter_chat_demo/services/apppref.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../../widgets/widgets.dart';
-import '../../pages.dart';
+import '../../../widgets/loading_view.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key, required this.arguments});
@@ -25,12 +26,12 @@ class ChatPage extends StatefulWidget {
 }
 
 class ChatPageState extends State<ChatPage> {
-  late final String currentUserId;
+  // late final String  currentUserId;
 
   List<QueryDocumentSnapshot> listMessage = [];
   int _limit = 20;
   int _limitIncrement = 20;
-  String groupChatId = "";
+  String groupChatId = AppPref.recieverUsid;
 
   File? imageFile;
   bool isLoading = false;
@@ -47,21 +48,21 @@ class ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    focusNode.addListener(onFocusChange);
-    listScrollController.addListener(_scrollListener);
-    readLocal();
-  }
+    //   focusNode.addListener(onFocusChange);
+    //   listScrollController.addListener(_scrollListener);
+    //   readLocal();
+    // }
 
-  _scrollListener() {
-    if (!listScrollController.hasClients) return;
-    if (listScrollController.offset >=
-            listScrollController.position.maxScrollExtent &&
-        !listScrollController.position.outOfRange &&
-        _limit <= listMessage.length) {
-      setState(() {
-        _limit += _limitIncrement;
-      });
-    }
+    // _scrollListener() {
+    //   if (!listScrollController.hasClients) return;
+    //   if (listScrollController.offset >=
+    //           listScrollController.position.maxScrollExtent &&
+    //       !listScrollController.position.outOfRange &&
+    //       _limit <= listMessage.length) {
+    //     setState(() {
+    //       _limit += _limitIncrement;
+    //     });
+    //   }
   }
 
   void onFocusChange() {
@@ -74,24 +75,24 @@ class ChatPageState extends State<ChatPage> {
   }
 
   void readLocal() {
-    if (authProvider.getUserFirebaseId()?.isNotEmpty == true) {
-      currentUserId = authProvider.getUserFirebaseId()!;
-    } else {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => LoginPage()),
-        (Route<dynamic> route) => false,
-      );
-    }
+    // if (authProvider.getUserFirebaseId()?.isNotEmpty == true) {
+    //   currentUserId = AppPref.userToken;
+    // } else {
+    //   Navigator.of(context).pushAndRemoveUntil(
+    //     MaterialPageRoute(builder: (context) => LoginPage()),
+    //     (Route<dynamic> route) => false,
+    //   );
+    // }
     String peerId = widget.arguments.peerId;
-    if (currentUserId.compareTo(peerId) > 0) {
-      groupChatId = '$currentUserId-$peerId';
+    if (AppPref.userToken.compareTo(peerId) > 0) {
+      groupChatId = AppPref.recieverUsid;
     } else {
-      groupChatId = '$peerId-$currentUserId';
+      groupChatId = AppPref.recieverUsid;
     }
 
     chatProvider.updateDataFirestore(
       FirestoreConstants.pathUserCollection,
-      currentUserId,
+      AppPref.userToken,
       {FirestoreConstants.chattingWith: peerId},
     );
   }
@@ -144,8 +145,8 @@ class ChatPageState extends State<ChatPage> {
   void onSendMessage(String content, int type) {
     if (content.trim().isNotEmpty) {
       textEditingController.clear();
-      chatProvider.sendMessage(
-          content, type, groupChatId, currentUserId, widget.arguments.peerId);
+      chatProvider.sendMessage(content, type, AppPref.recieverUsid,
+          AppPref.userToken, widget.arguments.peerId);
       if (listScrollController.hasClients) {
         listScrollController.animateTo(0,
             duration: Duration(milliseconds: 300), curve: Curves.easeOut);
@@ -159,7 +160,7 @@ class ChatPageState extends State<ChatPage> {
   Widget buildItem(int index, DocumentSnapshot? document) {
     if (document != null) {
       MessageChat messageChat = MessageChat.fromDocument(document);
-      if (messageChat.idFrom == currentUserId) {
+      if (messageChat.idFrom == AppPref.userToken) {
         // Right (my message)
         return Row(
           children: <Widget>[
@@ -437,7 +438,7 @@ class ChatPageState extends State<ChatPage> {
   bool isLastMessageLeft(int index) {
     if ((index > 0 &&
             listMessage[index - 1].get(FirestoreConstants.idFrom) ==
-                currentUserId) ||
+                AppPref.userToken) ||
         index == 0) {
       return true;
     } else {
@@ -448,7 +449,7 @@ class ChatPageState extends State<ChatPage> {
   bool isLastMessageRight(int index) {
     if ((index > 0 &&
             listMessage[index - 1].get(FirestoreConstants.idFrom) !=
-                currentUserId) ||
+                AppPref.userToken) ||
         index == 0) {
       return true;
     } else {
@@ -464,7 +465,7 @@ class ChatPageState extends State<ChatPage> {
     } else {
       chatProvider.updateDataFirestore(
         FirestoreConstants.pathUserCollection,
-        currentUserId,
+        AppPref.userToken,
         {FirestoreConstants.chattingWith: null},
       );
       Navigator.pop(context);
@@ -704,40 +705,35 @@ class ChatPageState extends State<ChatPage> {
 
   Widget buildListMessage() {
     return Flexible(
-      child: groupChatId.isNotEmpty
-          ? StreamBuilder<QuerySnapshot>(
-              stream: chatProvider.getChatStream(groupChatId, _limit),
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot.hasData) {
-                  listMessage = snapshot.data!.docs;
-                  if (listMessage.length > 0) {
-                    return ListView.builder(
-                      padding: EdgeInsets.all(10),
-                      itemBuilder: (context, index) =>
-                          buildItem(index, snapshot.data?.docs[index]),
-                      itemCount: snapshot.data?.docs.length,
-                      reverse: true,
-                      controller: listScrollController,
-                    );
+        child: groupChatId.isNotEmpty
+            ? StreamBuilder<QuerySnapshot>(
+                stream: chatProvider.getChatStream(groupChatId, _limit),
+                builder: (BuildContext context,
+                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasData) {
+                    listMessage = snapshot.data!.docs;
+                    if (listMessage.length > 0) {
+                      return ListView.builder(
+                        padding: EdgeInsets.all(10),
+                        itemBuilder: (context, index) =>
+                            buildItem(index, snapshot.data?.docs[index]),
+                        itemCount: snapshot.data?.docs.length,
+                        reverse: true,
+                        controller: listScrollController,
+                      );
+                    } else {
+                      return Center(child: Text("No message here yet..."));
+                    }
                   } else {
-                    return Center(child: Text("No message here yet..."));
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: ColorConstants.themeColor,
+                      ),
+                    );
                   }
-                } else {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: ColorConstants.themeColor,
-                    ),
-                  );
-                }
-              },
-            )
-          : Center(
-              child: CircularProgressIndicator(
-                color: ColorConstants.themeColor,
-              ),
-            ),
-    );
+                },
+              )
+            : Container());
   }
 }
 
