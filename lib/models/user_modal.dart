@@ -3,11 +3,15 @@ class UserModel {
   String? username;
   String? email;
   String? phone;
+  String? photoUrl;
+  String? aboutMe;
   UserModel({
     this.uid,
     this.phone,
     this.username,
     this.email,
+    this.aboutMe,
+    this.photoUrl,
   });
 
 //data from Server
@@ -18,6 +22,8 @@ class UserModel {
       username: map['username'],
       phone: map['phone'],
       email: map['email'],
+      aboutMe: map['aboutMe'],
+      photoUrl: map['photoUrl'],
     );
   }
 
@@ -28,6 +34,8 @@ class UserModel {
       'username': username,
       'email': email,
       'phone': phone,
+      'photoUrl': photoUrl,
+      'aboutMe': aboutMe,
     };
   }
 }

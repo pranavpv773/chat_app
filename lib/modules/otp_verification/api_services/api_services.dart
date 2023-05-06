@@ -27,12 +27,12 @@ class OtpApiService {
     }
   }
 
-  Future<SignUpResponse?> signUp(SignUpModel data) async {
+  Future<SignUpResponse?> signUp(EmailOtp data) async {
     log('reached on sign up');
     try {
       Response response = await Dio().post(
-          'https://menzclub.onrender.com/account/signup',
-          data: data.toJson());
+          'https://chat-app-server-qvr3.onrender.com/api/send-mail/',
+          data: {"email": "krishnajithus673@gmail.com"});
       if (response.statusCode! >= 200 && response.statusCode! <= 299) {
         log('signup ${response.data.toString()}');
 

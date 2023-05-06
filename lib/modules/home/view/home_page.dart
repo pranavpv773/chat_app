@@ -1,8 +1,24 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
+import 'package:flutter_chat_demo/models/popup_choices.dart';
+import 'package:flutter_chat_demo/modules/Login/model_view/login_provider.dart';
+import 'package:flutter_chat_demo/modules/Login/view/login_page.dart';
+import 'package:flutter_chat_demo/modules/settings/view/settings_page.dart';
+import 'package:flutter_chat_demo/providers/auth_provider.dart';
+import 'package:flutter_chat_demo/services/apppref.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 
+import '../../../utils/debouncer.dart';
 import '../../chat/view/chat_page.dart';
+import '../model_view/home_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,29 +30,29 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   HomePageState({Key? key});
 
-  // final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-  // final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  //     FlutterLocalNotificationsPlugin();
-  // final GoogleSignIn googleSignIn = GoogleSignIn();
-  // final ScrollController listScrollController = ScrollController();
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+  final ScrollController listScrollController = ScrollController();
 
-  // int _limit = 20;
-  // final int _limitIncrement = 20;
-  // String _textSearch = "";
-  // bool isLoading = false;
+  int _limit = 20;
+  final int _limitIncrement = 20;
+  String _textSearch = "";
+  bool isLoading = false;
 
-  // late final AuthProvider authProvider = context.read<AuthProvider>();
-  // late final HomeProvider homeProvider = context.read<HomeProvider>();
-  // late final String currentUserId;
+  late final AuthProvider authProvider = context.read<AuthProvider>();
+  late final HomeProvider homeProvider = context.read<HomeProvider>();
+  late final String currentUserId;
 
-  // final Debouncer searchDebouncer = Debouncer(milliseconds: 300);
-  // final StreamController<bool> btnClearController = StreamController<bool>();
-  // final TextEditingController searchBarTec = TextEditingController();
+  final Debouncer searchDebouncer = Debouncer(milliseconds: 300);
+  final StreamController<bool> btnClearController = StreamController<bool>();
+  final TextEditingController searchBarTec = TextEditingController();
 
-  // final List<PopupChoices> choices = <PopupChoices>[
-  //   PopupChoices(title: 'Settings', icon: Icons.settings),
-  //   PopupChoices(title: 'Log out', icon: Icons.exit_to_app),
-  // ];
+  final List<PopupChoices> choices = <PopupChoices>[
+    PopupChoices(title: 'Settings', icon: Icons.settings),
+    PopupChoices(title: 'Log out', icon: Icons.exit_to_app),
+  ];
 
   @override
   void initState() {
@@ -49,7 +65,7 @@ class HomePageState extends State<HomePage> {
     //     (Route<dynamic> route) => false,
     //   );
     // }
-    // registerNotification();
+    registerNotification();
     // configLocalNotification();
     // listScrollController.addListener(scrollListener);
   }
@@ -60,39 +76,39 @@ class HomePageState extends State<HomePage> {
   //   btnClearController.close();
   // }
 
-  // void registerNotification() {
-  //   firebaseMessaging.requestPermission();
+  void registerNotification() {
+    firebaseMessaging.requestPermission();
 
-  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-  //     print('onMessage: $message');
-  //     if (message.notification != null) {
-  //       showNotification(message.notification!);
-  //     }
-  //     return;
-  //   });
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('onMessage: $message');
+      if (message.notification != null) {
+        showNotification(message.notification!);
+      }
+      return;
+    });
 
-  //   firebaseMessaging.getToken().then((token) {
-  //     print('push token: $token');
-  //     if (token != null) {
-  //       homeProvider.updateDataFirestore(FirestoreConstants.pathUserCollection,
-  //           currentUserId, {'pushToken': token});
-  //     }
-  //   }).catchError((err) {
-  //     Fluttertoast.showToast(msg: err.message.toString());
-  //   });
-  // }
+    firebaseMessaging.getToken().then((token) {
+      print('push token: $token');
+      if (token != null) {
+        homeProvider.updateDataFirestore(FirestoreConstants.pathUserCollection,
+            currentUserId, {'pushToken': token});
+      }
+    }).catchError((err) {
+      Fluttertoast.showToast(msg: err.message.toString());
+    });
+  }
 
-  // void configLocalNotification() {
-  //   AndroidInitializationSettings initializationSettingsAndroid =
-  //       AndroidInitializationSettings('app_icon');
-  //   DarwinInitializationSettings initializationSettingsIOS =
-  //       DarwinInitializationSettings();
-  //   InitializationSettings initializationSettings = InitializationSettings(
-  //     android: initializationSettingsAndroid,
-  //     iOS: initializationSettingsIOS,
-  //   );
-  //   flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  // }
+  void configLocalNotification() {
+    AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('app_icon');
+    DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings();
+    InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
 
   // void scrollListener() {
   //   if (listScrollController.offset >=
@@ -104,139 +120,144 @@ class HomePageState extends State<HomePage> {
   //   }
   // }
 
-  // void onItemMenuPress(PopupChoices choice) {
-  //   if (choice.title == 'Log out') {
-  //     handleSignOut();
-  //   } else {
-  //     Navigator.push(
-  //         context, MaterialPageRoute(builder: (context) => SettingsPage()));
-  //   }
-  // }
+  void onItemMenuPress(PopupChoices choice) {
+    if (choice.title == 'Log out') {
+      // AppPref.userToken = "";
+      context.read<LoginProvider>().logOut(context);
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+          (route) => false);
+    } else {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => SettingsPage()));
+    }
+  }
 
-  // void showNotification(RemoteNotification remoteNotification) async {
-  //   AndroidNotificationDetails androidPlatformChannelSpecifics =
-  //       AndroidNotificationDetails(
-  //     Platform.isAndroid ? 'android.packege' : 'ios.package',
-  //     'Flutter chat demo',
-  //     playSound: true,
-  //     enableVibration: true,
-  //     importance: Importance.max,
-  //     priority: Priority.high,
-  //   );
-  //   DarwinNotificationDetails iOSPlatformChannelSpecifics =
-  //       DarwinNotificationDetails();
-  //   NotificationDetails platformChannelSpecifics = NotificationDetails(
-  //     android: androidPlatformChannelSpecifics,
-  //     iOS: iOSPlatformChannelSpecifics,
-  //   );
+  void showNotification(RemoteNotification remoteNotification) async {
+    AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      Platform.isAndroid ? 'android.packege' : 'ios.package',
+      'chat App',
+      playSound: true,
+      enableVibration: true,
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    DarwinNotificationDetails iOSPlatformChannelSpecifics =
+        DarwinNotificationDetails();
+    NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
 
-  //   print(remoteNotification);
+    print(remoteNotification);
 
-  //   await flutterLocalNotificationsPlugin.show(
-  //     0,
-  //     remoteNotification.title,
-  //     remoteNotification.body,
-  //     platformChannelSpecifics,
-  //     payload: null,
-  //   );
-  // }
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      remoteNotification.title,
+      remoteNotification.body,
+      platformChannelSpecifics,
+      payload: null,
+    );
+  }
 
   // Future<bool> onBackPress() {
   //   openDialog();
   //   return Future.value(false);
   // }
 
-  // Future<void> openDialog() async {
-  //   switch (await showDialog(
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return SimpleDialog(
-  //           clipBehavior: Clip.hardEdge,
-  //           shape:
-  //               RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-  //           contentPadding: EdgeInsets.zero,
-  //           children: <Widget>[
-  //             Container(
-  //               color: ColorConstants.themeColor,
-  //               padding: EdgeInsets.only(bottom: 10, top: 10),
-  //               child: Column(
-  //                 mainAxisSize: MainAxisSize.min,
-  //                 children: <Widget>[
-  //                   Container(
-  //                     child: Icon(
-  //                       Icons.exit_to_app,
-  //                       size: 30,
-  //                       color: Colors.white,
-  //                     ),
-  //                     margin: EdgeInsets.only(bottom: 10),
-  //                   ),
-  //                   Text(
-  //                     'Exit app',
-  //                     style: TextStyle(
-  //                         color: Colors.white,
-  //                         fontSize: 18,
-  //                         fontWeight: FontWeight.bold),
-  //                   ),
-  //                   Text(
-  //                     'Are you sure to exit app?',
-  //                     style: TextStyle(color: Colors.white70, fontSize: 14),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //             SimpleDialogOption(
-  //               onPressed: () {
-  //                 Navigator.pop(context, 0);
-  //               },
-  //               child: Row(
-  //                 children: <Widget>[
-  //                   Container(
-  //                     child: Icon(
-  //                       Icons.cancel,
-  //                       color: ColorConstants.primaryColor,
-  //                     ),
-  //                     margin: EdgeInsets.only(right: 10),
-  //                   ),
-  //                   Text(
-  //                     'Cancel',
-  //                     style: TextStyle(
-  //                         color: ColorConstants.primaryColor,
-  //                         fontWeight: FontWeight.bold),
-  //                   )
-  //                 ],
-  //               ),
-  //             ),
-  //             SimpleDialogOption(
-  //               onPressed: () {
-  //                 Navigator.pop(context, 1);
-  //               },
-  //               child: Row(
-  //                 children: <Widget>[
-  //                   Container(
-  //                     child: Icon(
-  //                       Icons.check_circle,
-  //                       color: ColorConstants.primaryColor,
-  //                     ),
-  //                     margin: EdgeInsets.only(right: 10),
-  //                   ),
-  //                   Text(
-  //                     'Yes',
-  //                     style: TextStyle(
-  //                         color: ColorConstants.primaryColor,
-  //                         fontWeight: FontWeight.bold),
-  //                   )
-  //                 ],
-  //               ),
-  //             ),
-  //           ],
-  //         );
-  //       })) {
-  //     case 0:
-  //       break;
-  //     case 1:
-  //       exit(0);
-  //   }
-  // }
+  Future<void> openDialog() async {
+    switch (await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            clipBehavior: Clip.hardEdge,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            contentPadding: EdgeInsets.zero,
+            children: <Widget>[
+              Container(
+                color: ColorConstants.themeColor,
+                padding: EdgeInsets.only(bottom: 10, top: 10),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Container(
+                      child: Icon(
+                        Icons.exit_to_app,
+                        size: 30,
+                        color: Colors.white,
+                      ),
+                      margin: EdgeInsets.only(bottom: 10),
+                    ),
+                    Text(
+                      'Exit app',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'Are you sure to exit app?',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context, 0);
+                },
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      child: Icon(
+                        Icons.cancel,
+                        color: ColorConstants.primaryColor,
+                      ),
+                      margin: EdgeInsets.only(right: 10),
+                    ),
+                    Text(
+                      'Cancel',
+                      style: TextStyle(
+                          color: ColorConstants.primaryColor,
+                          fontWeight: FontWeight.bold),
+                    )
+                  ],
+                ),
+              ),
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context, 1);
+                },
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      child: Icon(
+                        Icons.check_circle,
+                        color: ColorConstants.primaryColor,
+                      ),
+                      margin: EdgeInsets.only(right: 10),
+                    ),
+                    Text(
+                      'Yes',
+                      style: TextStyle(
+                          color: ColorConstants.primaryColor,
+                          fontWeight: FontWeight.bold),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          );
+        })) {
+      case 0:
+        break;
+      case 1:
+        exit(0);
+    }
+  }
 
   // Future<void> handleSignOut() async {
   //   authProvider.handleSignOut();
@@ -255,7 +276,7 @@ class HomePageState extends State<HomePage> {
           style: TextStyle(color: ColorConstants.primaryColor),
         ),
         centerTitle: true,
-        // actions: <Widget>[buildPopupMenu()],
+        actions: <Widget>[buildPopupMenu()],
       ),
       body: SafeArea(
         child: Stack(
@@ -263,7 +284,7 @@ class HomePageState extends State<HomePage> {
             // List
             Column(
               children: [
-                //  buildSearchBar(),
+                buildSearchBar(),
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
@@ -275,8 +296,12 @@ class HomePageState extends State<HomePage> {
                         if ((snapshot.data?.docs.length ?? 0) > 0) {
                           return ListView.builder(
                             padding: EdgeInsets.all(10),
-                            itemBuilder: (context, index) =>
-                                buildItem(context, snapshot.data?.docs[index]),
+                            itemBuilder: (context, index) {
+                              print(
+                                  "${snapshot.data?.docs[index]['uid']}--- ${AppPref.useruid}");
+                              return buildItem(
+                                  context, snapshot.data?.docs[index]);
+                            },
                             itemCount: snapshot.data?.docs.length,
                           );
                         } else {
@@ -307,100 +332,102 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget buildSearchBar() {
-  //   return Container(
-  //     height: 40,
-  //     child: Row(
-  //       crossAxisAlignment: CrossAxisAlignment.center,
-  //       children: [
-  //         Icon(Icons.search, color: ColorConstants.greyColor, size: 20),
-  //         SizedBox(width: 5),
-  //         Expanded(
-  //           child: TextFormField(
-  //             textInputAction: TextInputAction.search,
-  //             controller: searchBarTec,
-  //             onChanged: (value) {
-  //               searchDebouncer.run(() {
-  //                 if (value.isNotEmpty) {
-  //                   btnClearController.add(true);
-  //                   setState(() {
-  //                     _textSearch = value;
-  //                   });
-  //                 } else {
-  //                   btnClearController.add(false);
-  //                   setState(() {
-  //                     _textSearch = "";
-  //                   });
-  //                 }
-  //               });
-  //             },
-  //             decoration: InputDecoration.collapsed(
-  //               hintText: 'Search nickname (you have to type exactly string)',
-  //               hintStyle:
-  //                   TextStyle(fontSize: 13, color: ColorConstants.greyColor),
-  //             ),
-  //             style: TextStyle(fontSize: 13),
-  //           ),
-  //         ),
-  //         StreamBuilder<bool>(
-  //             stream: btnClearController.stream,
-  //             builder: (context, snapshot) {
-  //               return snapshot.data == true
-  //                   ? GestureDetector(
-  //                       onTap: () {
-  //                         searchBarTec.clear();
-  //                         btnClearController.add(false);
-  //                         setState(() {
-  //                           _textSearch = "";
-  //                         });
-  //                       },
-  //                       child: Icon(Icons.clear_rounded,
-  //                           color: ColorConstants.greyColor, size: 20))
-  //                   : SizedBox.shrink();
-  //             }),
-  //       ],
-  //     ),
-  //     decoration: BoxDecoration(
-  //       borderRadius: BorderRadius.circular(16),
-  //       color: ColorConstants.greyColor2,
-  //     ),
-  //     padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-  //     margin: EdgeInsets.fromLTRB(16, 8, 16, 8),
-  //   );
-  // }
+  Widget buildSearchBar() {
+    return Container(
+      height: 40,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.search, color: ColorConstants.greyColor, size: 20),
+          SizedBox(width: 5),
+          Expanded(
+            child: TextFormField(
+              textInputAction: TextInputAction.search,
+              controller: searchBarTec,
+              onChanged: (value) {
+                searchDebouncer.run(() {
+                  if (value.isNotEmpty) {
+                    btnClearController.add(true);
+                    setState(() {
+                      _textSearch = value;
+                    });
+                  } else {
+                    btnClearController.add(false);
+                    setState(() {
+                      _textSearch = "";
+                    });
+                  }
+                });
+              },
+              decoration: InputDecoration.collapsed(
+                hintText: 'Search nickname (you have to type exactly string)',
+                hintStyle:
+                    TextStyle(fontSize: 13, color: ColorConstants.greyColor),
+              ),
+              style: TextStyle(fontSize: 13),
+            ),
+          ),
+          StreamBuilder<bool>(
+              stream: btnClearController.stream,
+              builder: (context, snapshot) {
+                return snapshot.data == true
+                    ? GestureDetector(
+                        onTap: () {
+                          searchBarTec.clear();
+                          btnClearController.add(false);
+                          setState(() {
+                            _textSearch = "";
+                          });
+                        },
+                        child: Icon(Icons.clear_rounded,
+                            color: ColorConstants.greyColor, size: 20))
+                    : SizedBox.shrink();
+              }),
+        ],
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: ColorConstants.greyColor2,
+      ),
+      padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+      margin: EdgeInsets.fromLTRB(16, 8, 16, 8),
+    );
+  }
 
-  // Widget buildPopupMenu() {
-  //   return PopupMenuButton<PopupChoices>(
-  //     onSelected: onItemMenuPress,
-  //     itemBuilder: (BuildContext context) {
-  //       return choices.map((PopupChoices choice) {
-  //         return PopupMenuItem<PopupChoices>(
-  //             value: choice,
-  //             child: Row(
-  //               children: <Widget>[
-  //                 Icon(
-  //                   choice.icon,
-  //                   color: ColorConstants.primaryColor,
-  //                 ),
-  //                 Container(
-  //                   width: 10,
-  //                 ),
-  //                 Text(
-  //                   choice.title,
-  //                   style: TextStyle(color: ColorConstants.primaryColor),
-  //                 ),
-  //               ],
-  //             ));
-  //       }).toList();
-  //     },
-  //   );
-  // }
+  Widget buildPopupMenu() {
+    return PopupMenuButton<PopupChoices>(
+      onSelected: onItemMenuPress,
+      itemBuilder: (BuildContext context) {
+        return choices.map((PopupChoices choice) {
+          return PopupMenuItem<PopupChoices>(
+              value: choice,
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    choice.icon,
+                    color: ColorConstants.primaryColor,
+                  ),
+                  Container(
+                    width: 10,
+                  ),
+                  Text(
+                    choice.title,
+                    style: TextStyle(color: ColorConstants.primaryColor),
+                  ),
+                ],
+              ));
+        }).toList();
+      },
+    );
+  }
 
   Widget buildItem(BuildContext context, DocumentSnapshot? document) {
     return Container(
       child: TextButton(
         child: Row(
           children: <Widget>[
+            // document!['photoUrl'] == null || document['photoUrl'] == ""
+            //     ?
             Material(
               child: Icon(
                 Icons.account_circle,
@@ -410,6 +437,7 @@ class HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.all(Radius.circular(25)),
               clipBehavior: Clip.hardEdge,
             ),
+            //   : CircleAvatar(child: Image.file(document['photoUrl'])),
             Flexible(
               child: Container(
                 child: Column(
@@ -443,12 +471,13 @@ class HomePageState extends State<HomePage> {
           // if (Utilities.isKeyboardShowing()) {
           //   Utilities.closeKeyboard(context);
           // }
+          AppPref.recieverUsid = document['uid'];
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ChatPage(
                 arguments: ChatPageArguments(
-                  peerId: "userChat.id",
+                  peerId: document['uid'],
                   peerAvatar: "userChat.photoUrl",
                   peerNickname: document['username'],
                 ),

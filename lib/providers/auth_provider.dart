@@ -73,8 +73,8 @@ class AuthProvider extends ChangeNotifier {
               .collection(FirestoreConstants.pathUserCollection)
               .doc(firebaseUser.uid)
               .set({
-            FirestoreConstants.nickname: firebaseUser.displayName,
-            FirestoreConstants.photoUrl: firebaseUser.photoURL,
+            FirestoreConstants.nickname: firebaseUser.displayName ?? "display",
+            FirestoreConstants.photoUrl: firebaseUser.photoURL ?? "",
             FirestoreConstants.id: firebaseUser.uid,
             'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
             FirestoreConstants.chattingWith: null
@@ -92,7 +92,7 @@ class AuthProvider extends ChangeNotifier {
           DocumentSnapshot documentSnapshot = documents[0];
           UserChat userChat = UserChat.fromDocument(documentSnapshot);
           // Write data to local
-          await prefs.setString(FirestoreConstants.id, userChat.id);
+          await prefs.setString(FirestoreConstants.id, userChat.id.toString());
           await prefs.setString(FirestoreConstants.nickname, userChat.nickname);
           await prefs.setString(FirestoreConstants.photoUrl, userChat.photoUrl);
           await prefs.setString(FirestoreConstants.aboutMe, userChat.aboutMe);

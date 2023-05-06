@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/color_constants.dart';
 import 'package:flutter_chat_demo/providers/auth_provider.dart';
+import 'package:flutter_chat_demo/services/apppref.dart';
 import 'package:provider/provider.dart';
 
 import '../../pages.dart';
@@ -25,7 +26,7 @@ class SplashPageState extends State<SplashPage> {
   void checkSignedIn() async {
     AuthProvider authProvider = context.read<AuthProvider>();
     bool isLoggedIn = await authProvider.isLoggedIn();
-    if (isLoggedIn) {
+    if (AppPref.userToken != "") {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
