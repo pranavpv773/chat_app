@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/modules/Login/model_view/login_provider.dart';
+import 'package:flutter_chat_demo/modules/otp_verification/view_model/otp_provider.dart';
 import 'package:flutter_chat_demo/modules/sign_up/model_view/sign_up_provider.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
@@ -54,6 +55,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (create) => LoginProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (create) => OtpVerifyProvider(),
         ),
         Provider<HomeProvider>(
           create: (_) => HomeProvider(
