@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../pages/home_page.dart';
+import '../../home/view/home_page.dart';
 
 class LoginProvider with ChangeNotifier {
   final userName = TextEditingController();
@@ -12,13 +12,15 @@ class LoginProvider with ChangeNotifier {
   final formKey = GlobalKey<FormState>();
   final password = TextEditingController();
   FirebaseAuth auth = FirebaseAuth.instance;
-
+  bool obsecure = false;
   onTabLoginFunction(
-      BuildContext context, String emailFn, String passwordFn) async {
+    BuildContext context,
+  ) async {
     if (formKey.currentState!.validate()) {
       try {
         await auth
-            .signInWithEmailAndPassword(email: emailFn, password: passwordFn)
+            .signInWithEmailAndPassword(
+                email: email.text, password: password.text)
             .then(
               (value) => {
                 Navigator.pushReplacement(
@@ -46,5 +48,15 @@ class LoginProvider with ChangeNotifier {
     return RegExp(
             r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
         .hasMatch(input);
+  }
+
+  obSecureFn() {
+    if (obsecure == false) {
+      obsecure = true;
+      notifyListeners();
+    } else {
+      obsecure = false;
+      notifyListeners();
+    }
   }
 }

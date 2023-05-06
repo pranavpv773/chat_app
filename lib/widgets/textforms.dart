@@ -8,12 +8,14 @@ class SignUpTextforms extends StatelessWidget {
     required this.obscureText,
     required this.vertical,
     required this.controller,
+    this.validator,
   }) : super(key: key);
   final IconData icon;
   final String text;
   final bool obscureText;
   final double vertical;
   final TextEditingController controller;
+  final Function(String?)? validator;
 
   @override
   Widget build(BuildContext context) {
@@ -47,21 +49,21 @@ class SignUpTextforms extends StatelessWidget {
             ),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(
               color: Colors.grey,
               width: 2.0,
             ),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(
               color: Colors.teal,
               width: 2.0,
             ),
           ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(
               color: Colors.grey,
               width: 2.0,
@@ -86,13 +88,14 @@ class PasswordTextforms extends StatelessWidget {
     required this.obscureText,
     required this.vertical,
     required this.controller,
+    //  required this.suffix,
   }) : super(key: key);
   final IconData icon;
   final String text;
   final bool obscureText;
   final double vertical;
   final TextEditingController controller;
-
+  // final Widget suffix;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -126,26 +129,27 @@ class PasswordTextforms extends StatelessWidget {
             ),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
               color: Colors.grey,
               width: 2.0,
             ),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(
               color: Colors.teal,
               width: 2.0,
             ),
           ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
               color: Colors.grey,
               width: 2.0,
             ),
           ),
+          //   suffixIcon: suffix,
           hintText: text,
           hintStyle: TextStyle(
             fontSize: 15,

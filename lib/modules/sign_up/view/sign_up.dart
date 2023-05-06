@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_demo/providers/sign_up_provider.dart';
+import 'package:flutter_chat_demo/modules/sign_up/model_view/sign_up_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../widgets/textforms.dart';
+import '../../../widgets/textforms.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -44,16 +44,32 @@ class SignUpScreen extends StatelessWidget {
                   PasswordTextforms(
                     icon: Icons.lock_outline,
                     text: "Password",
-                    obscureText: true,
+                    obscureText: context.watch<SignUpProvider>().obsecurePass,
                     vertical: 15,
                     controller: context.read<SignUpProvider>().password,
+                    // suffix: IconButton(
+                    //     onPressed: () {
+                    //       context.read<SignUpProvider>().obSecurePassFn();
+                    //     },
+                    //     icon: Icon(context.watch<SignUpProvider>().obsecurePass
+                    //         ? Icons.visibility_rounded
+                    //         : Icons.visibility_off_rounded)),
                   ),
                   PasswordTextforms(
                     icon: Icons.lock_reset_outlined,
                     text: "Confirm Password",
-                    obscureText: true,
+                    obscureText:
+                        context.watch<SignUpProvider>().obsecureConfirm,
                     vertical: 15,
                     controller: context.read<SignUpProvider>().confirmPassword,
+                    // suffix: IconButton(
+                    //     onPressed: () {
+                    //       context.read<SignUpProvider>().obSecureConfirmFn();
+                    //     },
+                    //     icon: Icon(
+                    //         context.watch<SignUpProvider>().obsecureConfirm
+                    //             ? Icons.visibility_rounded
+                    //             : Icons.visibility_off_rounded)),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 58.0),
@@ -67,21 +83,13 @@ class SignUpScreen extends StatelessWidget {
                         elevation: 10,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                            30,
+                            10,
                           ),
                         ),
                       ),
                       onPressed: (() {
                         context.read<SignUpProvider>().signUp(
                               context,
-                              context.read<SignUpProvider>().email.text,
-                              context.read<SignUpProvider>().password.text,
-                              context.read<SignUpProvider>().userName.text,
-                              context.read<SignUpProvider>().phoneNumber.text,
-                              context
-                                  .read<SignUpProvider>()
-                                  .confirmPassword
-                                  .text,
                             );
                       }),
                       child: const Text(
